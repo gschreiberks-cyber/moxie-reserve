@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shuffle, Hand, Check, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import CurationTimeline from '@/components/alchemist/CurationTimeline';
 
 const VOLUME_MAP = { Full: 750, Half: 375, Quarter: 185 };
 
@@ -83,12 +84,9 @@ function BespokeFormulation({ openBottles, onSave }) {
               <p className="font-body text-xs text-foreground truncate flex-1">{item.bottle.bottle_name}</p>
             </div>
           ))}
-          <div className="pt-2 border-t border-border flex justify-between text-xs font-body">
-            <span className="text-muted-foreground uppercase tracking-widest">Marrying Time</span>
-            <span style={{ color: '#D4AF37' }}>21–45 Days</span>
-          </div>
+          <CurationTimeline blendTypeId="apex" />
           <Button
-            onClick={() => onSave(items, '21–45 Days', 'Apex — Bespoke Formulation')}
+            onClick={() => onSave(items, '74–89 Days', 'Apex — Bespoke Formulation')}
             className="w-full gold-btn text-xs uppercase tracking-widest font-body"
             disabled={selected.length < 2}
           >
@@ -173,12 +171,9 @@ function AlgorithmicCuration({ openBottles, onSave }) {
               </div>
             </div>
           ))}
-          <div className="pt-2 border-t border-border flex justify-between text-xs font-body">
-            <span className="text-muted-foreground uppercase tracking-widest">Marrying Time</span>
-            <span style={{ color: '#D4AF37' }}>{result.marryingTime}</span>
-          </div>
+          <CurationTimeline blendTypeId="apex" />
           <Button
-            onClick={() => onSave(result.items, result.marryingTime, 'Apex — Algorithmic Curation')}
+            onClick={() => onSave(result.items, '74–89 Days', 'Apex — Algorithmic Curation')}
             className="w-full gold-btn text-xs uppercase tracking-widest font-body"
           >
             <Save className="w-4 h-4 mr-2" />

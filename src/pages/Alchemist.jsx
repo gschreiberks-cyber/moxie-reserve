@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import DragonGlassDecanter from '@/components/alchemist/DragonGlassDecanter';
 import ApexBlend from '@/components/alchemist/ApexBlend';
+import CurationTimeline from '@/components/alchemist/CurationTimeline';
 
 const VOLUME_MAP = { Full: 750, Half: 375, Quarter: 185 };
 
@@ -162,10 +163,7 @@ function RecipeCard({ result, onSave, onRegenerate }) {
           <span className="text-muted-foreground uppercase tracking-widest">Batch Total</span>
           <span className="text-foreground">{totalOz} oz · 750ml</span>
         </div>
-        <div className="flex justify-between text-xs font-body">
-          <span className="text-muted-foreground uppercase tracking-widest">Marrying Time</span>
-          <span style={{ color: '#D4AF37' }}>{result.marryingTime}</span>
-        </div>
+        <CurationTimeline blendTypeId={result.blendTypeId} />
         <Button onClick={onSave} className="w-full gold-btn mt-2 text-xs uppercase tracking-widest font-body">
           <Save className="w-4 h-4 mr-2" />
           Save to Library
