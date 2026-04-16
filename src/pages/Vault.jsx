@@ -1,95 +1,13 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, TrendingDown, TrendingUp, Minus, X, Calendar, Telescope } from 'lucide-react';
+import { Plus, Trash2, TrendingDown, TrendingUp, Minus, X, Telescope } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AnimatePresence, motion } from 'framer-motion';
-
-const HORIZON_RELEASES = [
-  { month: 'January',   bottle_name: 'Old Forester Birthday Bourbon',        notes: 'Annual birthday release, limited allocation' },
-  { month: 'March',     bottle_name: "Jefferson's Ocean Voyage",              notes: 'Sea-aged expression, rotating voyages' },
-  { month: 'May',       bottle_name: 'Four Roses Limited Small Batch',        notes: 'Spring limited edition, retailer select' },
-  { month: 'June',      bottle_name: "Blanton's Straight from the Barrel",    notes: 'Japanese export, periodic US drops' },
-  { month: 'August',    bottle_name: "Maker's Mark Private Select",           notes: 'Annual stave-customized batch release' },
-  { month: 'September', bottle_name: "Maker's Mark Cellar Aged",              notes: 'Fall release, store pick season opens' },
-  { month: 'October',   bottle_name: 'William Larue Weller',                  notes: 'BTAC — most allocated of the collection' },
-  { month: 'October',   bottle_name: 'Thomas H. Handy Sazerac',               notes: 'BTAC — uncut rye, high demand' },
-  { month: 'November',  bottle_name: 'Buffalo Trace Antique Collection',      notes: 'BTAC flagship drop — George T. Stagg, etc.' },
-  { month: 'November',  bottle_name: 'Pappy Van Winkle Family Reserve',       notes: 'Highly allocated, November lottery season' },
-  { month: 'December',  bottle_name: 'Elijah Craig Barrel Proof Batch C',     notes: 'Third batch of the year, holiday shelf hits' },
-];
-
-function HorizonModal({ onAdd, onClose }) {
-  const [added, setAdded] = useState(new Set());
-
-  const handleAdd = (release, idx) => {
-    onAdd(release);
-    setAdded(prev => new Set([...prev, idx]));
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/80 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 40 }}
-        className="w-full max-w-lg bg-card border border-border rounded-t-2xl sm:rounded-2xl overflow-hidden"
-        style={{ maxHeight: '85vh' }}
-      >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between"
-          style={{ background: 'rgba(212,175,55,0.04)' }}>
-          <div className="flex items-center gap-3">
-            <Telescope className="w-4 h-4" style={{ color: '#D4AF37' }} />
-            <div>
-              <h2 className="font-heading text-lg text-foreground">The Horizon</h2>
-              <p className="text-[10px] text-muted-foreground font-body uppercase tracking-widest">Predicted Annual Releases</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* List */}
-        <div className="overflow-y-auto px-4 py-3 space-y-2" style={{ maxHeight: 'calc(85vh - 72px)' }}>
-          {HORIZON_RELEASES.map((release, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-3 p-3 rounded-md border border-border bg-card/50 hover:border-primary/20 transition-all"
-            >
-              <div className="w-14 shrink-0">
-                <span className="text-[10px] uppercase tracking-widest font-body" style={{ color: '#D4AF37' }}>
-                  {release.month}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-heading text-sm text-foreground truncate">{release.bottle_name}</p>
-                <p className="text-[10px] text-muted-foreground/70 font-body truncate">{release.notes}</p>
-              </div>
-              <button
-                onClick={() => handleAdd(release, idx)}
-                className={`shrink-0 w-7 h-7 rounded-full border flex items-center justify-center transition-all ${
-                  added.has(idx)
-                    ? 'border-primary/60 bg-primary/10 text-primary'
-                    : 'border-border text-muted-foreground hover:border-primary/50 hover:text-primary'
-                }`}
-              >
-                {added.has(idx) ? (
-                  <span className="text-[10px] font-body">✓</span>
-                ) : (
-                  <Plus className="w-3.5 h-3.5" />
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-    </div>
-  );
-}
+import HorizonModal from '@/components/vault/HorizonModal';
+import HuntBottleDetail from '@/components/vault/HuntBottleDetail';
 
 function PursuitForm({ onSubmit, onCancel }) {
   const [form, setForm] = useState({ bottle_name: '', target_price: '', market_price: '', notes: '' });
@@ -123,14 +41,14 @@ function PursuitForm({ onSubmit, onCancel }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-body">Target Price</Label>
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-body">Anticipated MSRP</Label>
               <div className="relative mt-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                 <Input type="number" value={form.target_price} onChange={(e) => setForm(p => ({ ...p, target_price: e.target.value }))} className="pl-6 bg-input border-border" placeholder="0" />
               </div>
             </div>
             <div>
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-body">Market Price</Label>
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-body">Est. Secondary</Label>
               <div className="relative mt-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                 <Input type="number" value={form.market_price} onChange={(e) => setForm(p => ({ ...p, market_price: e.target.value }))} className="pl-6 bg-input border-border" placeholder="0" />
@@ -154,14 +72,15 @@ function PursuitForm({ onSubmit, onCancel }) {
 function PriceDelta({ target, market }) {
   if (!target || !market) return null;
   const delta = market - target;
-  if (delta > 0) return <span className="text-destructive text-xs font-body flex items-center gap-1"><TrendingUp className="w-3 h-3" />${delta} over target</span>;
-  if (delta < 0) return <span className="text-green-500 text-xs font-body flex items-center gap-1"><TrendingDown className="w-3 h-3" />${Math.abs(delta)} under target</span>;
-  return <span className="text-muted-foreground text-xs font-body flex items-center gap-1"><Minus className="w-3 h-3" />At target</span>;
+  if (delta > 0) return <span className="text-destructive text-xs font-body flex items-center gap-1"><TrendingUp className="w-3 h-3" />${delta} over MSRP</span>;
+  if (delta < 0) return <span className="text-green-500 text-xs font-body flex items-center gap-1"><TrendingDown className="w-3 h-3" />${Math.abs(delta)} under MSRP</span>;
+  return <span className="text-muted-foreground text-xs font-body flex items-center gap-1"><Minus className="w-3 h-3" />At MSRP</span>;
 }
 
 export default function Vault() {
   const [showForm, setShowForm] = useState(false);
   const [showHorizon, setShowHorizon] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: wishlist = [], isLoading } = useQuery({
@@ -180,11 +99,16 @@ export default function Vault() {
   });
 
   const addFromHorizon = (release) => {
-    createMutation.mutate({ bottle_name: release.bottle_name, notes: `${release.month} release — ${release.notes}` });
+    createMutation.mutate({
+      bottle_name: release.bottle_name,
+      target_price: release.msrp,
+      market_price: release.secondary,
+      notes: `${release.month} ${release.year} release — ${release.notes}`,
+    });
   };
 
   return (
-    <div className="px-4 pt-6 max-w-lg mx-auto pb-8">
+    <div className="px-4 pt-6 max-w-lg mx-auto pb-32">
       {/* Header */}
       <div className="mb-8">
         <p className="text-[10px] uppercase tracking-[0.3em] font-body mb-1" style={{ color: '#D4AF37' }}>
@@ -214,7 +138,7 @@ export default function Vault() {
           <p className="text-muted-foreground font-body text-sm">No bottles on the hunt yet.</p>
         </div>
       ) : (
-        <div className="space-y-2 mb-8">
+        <div className="space-y-2">
           <AnimatePresence>
             {wishlist.map(item => (
               <motion.div
@@ -222,21 +146,25 @@ export default function Vault() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -80 }}
-                className="p-4 bg-card border border-border rounded-md group hover:border-primary/20 transition-all"
+                className="p-4 bg-card border border-border rounded-md group hover:border-primary/20 transition-all cursor-pointer"
+                onClick={() => setSelectedItem(item)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-heading text-base text-foreground truncate">{item.bottle_name}</h3>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground font-body">
-                      {item.target_price && <span>Target <span className="text-foreground">${item.target_price}</span></span>}
-                      {item.market_price && <span>Market <span className="text-foreground">${item.market_price}</span></span>}
+                      {item.target_price && <span>MSRP <span className="text-foreground">${item.target_price}</span></span>}
+                      {item.market_price && <span>Secondary <span style={{ color: '#D4AF37' }}>${item.market_price}</span></span>}
                     </div>
                     <div className="mt-1.5">
                       <PriceDelta target={item.target_price} market={item.market_price} />
                     </div>
-                    {item.notes && <p className="text-xs text-muted-foreground/70 mt-2 italic">{item.notes}</p>}
+                    {item.notes && <p className="text-xs text-muted-foreground/70 mt-2 italic truncate">{item.notes}</p>}
                   </div>
-                  <button onClick={() => deleteMutation.mutate(item.id)} className="p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 ml-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(item.id); }}
+                    className="p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 ml-2"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -246,10 +174,10 @@ export default function Vault() {
         </div>
       )}
 
-      {/* Floating The Horizon Button */}
+      {/* Floating The Horizon Button — fixed above nav */}
       <button
         onClick={() => setShowHorizon(true)}
-        className="fixed bottom-24 right-5 flex items-center gap-2 px-4 py-3 rounded-full border border-primary/40 text-xs uppercase tracking-widest font-body text-primary shadow-lg transition-all hover:border-primary/80 z-40"
+        className="fixed bottom-20 right-5 flex items-center gap-2 px-4 py-3 rounded-full border border-primary/40 text-xs uppercase tracking-widest font-body text-primary shadow-lg transition-all hover:border-primary/80 z-40"
         style={{
           background: 'rgba(11,11,11,0.9)',
           backdropFilter: 'blur(12px)',
@@ -262,9 +190,8 @@ export default function Vault() {
 
       {/* Modals */}
       <AnimatePresence>
-        {showHorizon && (
-          <HorizonModal onAdd={addFromHorizon} onClose={() => setShowHorizon(false)} />
-        )}
+        {showHorizon && <HorizonModal onAdd={addFromHorizon} onClose={() => setShowHorizon(false)} />}
+        {selectedItem && <HuntBottleDetail item={selectedItem} onClose={() => setSelectedItem(null)} />}
       </AnimatePresence>
 
       {showForm && <PursuitForm onSubmit={(data) => createMutation.mutate(data)} onCancel={() => setShowForm(false)} />}

@@ -15,6 +15,7 @@ export default function Library() {
   const [showSearch, setShowSearch] = useState(false);
   const [editingBottle, setEditingBottle] = useState(null);
   const [filter, setFilter] = useState('All');
+  const [showCreations, setShowCreations] = useState(false);
   const queryClient = useQueryClient();
   const { isPremium } = usePremium();
 
@@ -78,13 +79,18 @@ export default function Library() {
     }, 0);
   };
 
-  const filteredBottles = filter === 'All'
-    ? bottles
-    : filter === 'Open' || filter === 'Closed'
-      ? bottles.filter(b => b.status === filter)
-      : bottles.filter(b => b.rarity === filter);
+  const mainBottles = bottles.filter(b => !b.is_infinity_blend);
+  const infiniteBottles = bottles.filter(b => b.is_infinity_blend);
 
-  const canAdd = isPremium || bottles.length < 10;
+  const filteredBottles = showCreations
+    ? infiniteBottles
+    : filter === 'All'
+      ? mainBottles
+      : filter === 'Open' || filter === 'Closed'
+        ? mainBottles.filter(b => b.status === filter)
+        : mainBottles.filter(b => b.rarity === filter);
+
+  const canAdd = isPremium || mainBottles.length < 10;
 
   return (
     <div className="px-4 pt-6 max-w-lg mx-auto">
@@ -100,8 +106,32 @@ export default function Library() {
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+      {/* My Creations / Library toggle */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setShowCreations(false)}
+          className="px-4 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-body transition-all"
+          style={!showCreations
+            ? { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }
+            : { background: 'hsl(var(--secondary))', color: 'hsl(var(--secondary-foreground))' }
+          }
+        >
+          My Library
+        </button>
+        <button
+          onClick={() => setShowCreations(true)}
+          className="px-4 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-body transition-all"
+          style={showCreations
+            ? { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }
+            : { background: 'hsl(var(--secondary))', color: 'hsl(var(--secondary-foreground))' }
+          }
+        >
+          My Creations {infiniteBottles.length > 0 && `(${infiniteBottles.length})`}
+        </button>
+      </div>
+
+      {/* Filters — only show on main library view */}
+      {!showCreations && <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
         {[
           { label: 'All',     activeStyle: { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' } },
           { label: 'Open',    activeStyle: { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' } },
@@ -123,7 +153,7 @@ export default function Library() {
             {label}
           </button>
         ))}
-      </div>
+      </div>}
 
       {/* Actions */}
       <div className="flex gap-2 mb-6">

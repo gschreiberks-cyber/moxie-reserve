@@ -175,12 +175,27 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Upgrade link */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="text-center mb-4"
+      >
+        <Link
+          to="/settings"
+          className="text-[11px] font-body tracking-widest uppercase text-muted-foreground/60 hover:text-primary transition-colors"
+        >
+          Upgrade to Moxie Reserve Premium
+        </Link>
+      </motion.div>
+
       {/* Ambient note */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="text-center text-[11px] text-muted-foreground/50 font-body tracking-wider"
+        transition={{ delay: 0.85 }}
+        className="text-center text-[11px] text-muted-foreground/40 font-body tracking-wider"
       >
         No ads · No tracking · Your cellar, your privacy.
       </motion.p>

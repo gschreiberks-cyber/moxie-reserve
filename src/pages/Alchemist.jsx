@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import DragonGlassDecanter from '@/components/alchemist/DragonGlassDecanter';
 import ApexBlend from '@/components/alchemist/ApexBlend';
 import CurationTimeline from '@/components/alchemist/CurationTimeline';
+import MashBill from '@/components/alchemist/MashBill';
 
 const VOLUME_MAP = { Full: 750, Half: 375, Quarter: 185 };
 
@@ -164,6 +165,7 @@ function RecipeCard({ result, onSave, onRegenerate }) {
           <span className="text-foreground">{totalOz} oz · 750ml</span>
         </div>
         <CurationTimeline blendTypeId={result.blendTypeId} />
+        <MashBill items={result.items} />
         <Button onClick={onSave} className="w-full gold-btn mt-2 text-xs uppercase tracking-widest font-body">
           <Save className="w-4 h-4 mr-2" />
           Save to Library
