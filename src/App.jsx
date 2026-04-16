@@ -1,3 +1,4 @@
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -10,9 +11,12 @@ import Library from '@/pages/Library';
 import Vault from '@/pages/Vault';
 import Alchemist from '@/pages/Alchemist';
 import Settings from '@/pages/Settings';
+import Dashboard from '@/pages/Dashboard';
+import Splash from '@/pages/Splash';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const [splashDone, setSplashDone] = React.useState(false);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -36,15 +40,19 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<Library />} />
-        <Route path="/vault" element={<Vault />} />
-        <Route path="/alchemist" element={<Alchemist />} />
-        <Route path="/settings" element={<Settings />} />
-      </Route>
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <>
+      {!splashDone && <Splash onComplete={() => setSplashDone(true)} />}
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/vault" element={<Vault />} />
+          <Route path="/alchemist" element={<Alchemist />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </>
   );
 };
 

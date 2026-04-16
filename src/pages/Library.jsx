@@ -90,7 +90,7 @@ export default function Library() {
     <div className="px-4 pt-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-primary font-body mb-1">
+        <p className="text-[10px] uppercase tracking-[0.3em] font-body mb-1" style={{ color: '#D4AF37' }}>
           Moxie Reserve
         </p>
         <h1 className="font-heading text-3xl text-foreground">The Library</h1>
@@ -130,7 +130,7 @@ export default function Library() {
         </Button>
         <Button
           onClick={() => { setEditingBottle(null); setShowForm(true); }}
-          className="flex-1 bg-primary text-primary-foreground text-xs uppercase tracking-widest font-body"
+          className="flex-1 gold-btn text-xs uppercase tracking-widest font-body"
           disabled={!canAdd}
         >
           <Plus className="w-4 h-4 mr-2" />

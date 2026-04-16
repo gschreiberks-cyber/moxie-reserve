@@ -31,6 +31,16 @@
       "default": "Closed",
       "description": "Whether the bottle is open or closed"
     },
+    "estimated_volume": {
+      "type": "string",
+      "enum": [
+        "Full",
+        "Half",
+        "Quarter"
+      ],
+      "default": "Full",
+      "description": "Estimated remaining volume for open bottles"
+    },
     "rarity": {
       "type": "string",
       "enum": [
@@ -44,6 +54,11 @@
     "notes": {
       "type": "string",
       "description": "Tasting notes or personal notes"
+    },
+    "is_infinity_blend": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this bottle is a saved infinity blend"
     }
   },
   "required": [

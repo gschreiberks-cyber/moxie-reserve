@@ -29,7 +29,7 @@ export default function Settings() {
   return (
     <div className="px-4 pt-6 max-w-lg mx-auto">
       <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-primary font-body mb-1">
+        <p className="text-[10px] uppercase tracking-[0.3em] font-body mb-1" style={{ color: '#D4AF37' }}>
           Moxie Reserve
         </p>
         <h1 className="font-heading text-3xl text-foreground">Settings</h1>
@@ -55,7 +55,7 @@ export default function Settings() {
             </p>
             <Button
               onClick={handleUpgrade}
-              className="w-full bg-primary text-primary-foreground text-xs uppercase tracking-widest font-body"
+              className="w-full gold-btn text-xs uppercase tracking-widest font-body"
             >
               <Crown className="w-4 h-4 mr-2" />
               Upgrade to Premium for Life

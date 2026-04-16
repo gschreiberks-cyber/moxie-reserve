@@ -13,6 +13,7 @@ const defaultBottle = {
   proof: '',
   purchase_price: '',
   status: 'Closed',
+  estimated_volume: 'Full',
   rarity: 'Core',
   notes: '',
 };
@@ -126,6 +127,22 @@ export default function BottleForm({ bottle, onSubmit, onCancel }) {
               </Select>
             </div>
           </div>
+
+          {form.status === 'Open' && (
+            <div>
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-body">Estimated Volume</Label>
+              <Select value={form.estimated_volume || 'Full'} onValueChange={(v) => update('estimated_volume', v)}>
+                <SelectTrigger className="mt-1 bg-input border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Full">Full (~750ml)</SelectItem>
+                  <SelectItem value="Half">Half (~375ml)</SelectItem>
+                  <SelectItem value="Quarter">Quarter (~185ml)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div>
             <Label className="text-xs uppercase tracking-widest text-muted-foreground font-body">Notes</Label>

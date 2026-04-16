@@ -16,7 +16,7 @@ export default function PremiumGate({ bottleCount, isPremium, children }) {
         Your complimentary tier allows 10 bottles. Upgrade to Premium for Life for unlimited access.
       </p>
       <Link to="/settings">
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-body text-xs uppercase tracking-widest">
+        <Button className="gold-btn font-body text-xs uppercase tracking-widest">
           Unlock Premium
         </Button>
       </Link>

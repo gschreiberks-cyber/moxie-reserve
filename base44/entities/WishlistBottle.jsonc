@@ -2,31 +2,21 @@
   "name": "WishlistBottle",
   "type": "object",
   "properties": {
-    "distillery": {
-      "type": "string",
-      "description": "Name of the distillery"
-    },
     "bottle_name": {
       "type": "string",
       "description": "Name of the bottle"
     },
-    "estimated_price": {
+    "target_price": {
       "type": "number",
-      "description": "Estimated price"
+      "description": "The price the user is willing to pay"
     },
-    "priority": {
-      "type": "string",
-      "enum": [
-        "Low",
-        "Medium",
-        "High"
-      ],
-      "default": "Medium",
-      "description": "Priority level"
+    "market_price": {
+      "type": "number",
+      "description": "Current market/retail price"
     },
     "notes": {
       "type": "string",
-      "description": "Notes about why this bottle is desired"
+      "description": "Hunt notes"
     }
   },
   "required": [

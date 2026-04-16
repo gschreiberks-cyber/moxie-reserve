@@ -89,5 +89,24 @@
 
   body {
     @apply bg-background text-foreground;
+    background: #0B0B0B;
+  }
+}
+
+@layer components {
+  .gold-btn {
+    @apply text-primary-foreground font-body;
+    background: linear-gradient(135deg, #c9a227, #D4AF37, #e1c46e);
+    box-shadow: 0 0 12px rgba(212,175,55,0.25), 0 0 24px rgba(212,175,55,0.1);
+    transition: box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+  .gold-btn:hover {
+    box-shadow: 0 0 18px rgba(212,175,55,0.45), 0 0 36px rgba(212,175,55,0.2);
+    opacity: 0.95;
+  }
+  .gold-btn:disabled {
+    box-shadow: none;
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 }
