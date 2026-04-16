@@ -2,23 +2,27 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, FlaskConical, Settings } from 'lucide-react';
 
-// Custom Glencairn-behind-bars SVG icon for The Hunt
+// Glencairn glass with bold jail bars
 function GlencairnIcon({ size = 20, active }) {
+  const stroke = active ? '#D4AF37' : 'currentColor';
+  const sw = active ? 2 : 1.5;
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Glencairn glass body */}
       <path
         d="M7 3 C7 3 5.5 7 5.5 10 C5.5 12.5 7 14 10 14 C13 14 14.5 12.5 14.5 10 C14.5 7 13 3 13 3 Z"
-        stroke="currentColor" strokeWidth={active ? 1.8 : 1.4} fill="none" strokeLinejoin="round"
+        stroke={stroke} strokeWidth={sw} fill="none" strokeLinejoin="round"
       />
       {/* Stem */}
-      <line x1="10" y1="14" x2="10" y2="17" stroke="currentColor" strokeWidth={active ? 1.8 : 1.4} strokeLinecap="round" />
+      <line x1="10" y1="14" x2="10" y2="17" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
       {/* Base */}
-      <line x1="7.5" y1="17" x2="12.5" y2="17" stroke="currentColor" strokeWidth={active ? 1.8 : 1.4} strokeLinecap="round" />
-      {/* Bars overlaid */}
-      <line x1="6" y1="2" x2="6" y2="16" stroke="currentColor" strokeWidth={active ? 1.5 : 1.2} strokeLinecap="round" opacity="0.7" />
-      <line x1="10" y1="2" x2="10" y2="5" stroke="currentColor" strokeWidth={active ? 1.5 : 1.2} strokeLinecap="round" opacity="0.7" />
-      <line x1="14" y1="2" x2="14" y2="16" stroke="currentColor" strokeWidth={active ? 1.5 : 1.2} strokeLinecap="round" opacity="0.7" />
+      <line x1="7" y1="17" x2="13" y2="17" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+      {/* JAIL BARS — bold, full-height vertical lines over the glass */}
+      <line x1="5"  y1="1" x2="5"  y2="18" stroke={stroke} strokeWidth={2.5} strokeLinecap="round" />
+      <line x1="10" y1="1" x2="10" y2="18" stroke={stroke} strokeWidth={2.5} strokeLinecap="round" />
+      <line x1="15" y1="1" x2="15" y2="18" stroke={stroke} strokeWidth={2.5} strokeLinecap="round" />
+      {/* Horizontal cross-bar */}
+      <line x1="4.5" y1="5" x2="15.5" y2="5" stroke={stroke} strokeWidth={2} strokeLinecap="round" />
     </svg>
   );
 }

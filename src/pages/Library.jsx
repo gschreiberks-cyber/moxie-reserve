@@ -8,6 +8,7 @@ import BottleCard from '@/components/library/BottleCard';
 import BottleForm from '@/components/library/BottleForm';
 import GlobalSearch from '@/components/library/GlobalSearch';
 import PremiumGate from '@/components/common/PremiumGate';
+import InfinityArchiveCard from '@/components/library/InfinityArchiveCard';
 import { usePremium } from '@/hooks/usePremium';
 
 export default function Library() {
@@ -126,7 +127,7 @@ export default function Library() {
             : { background: 'hsl(var(--secondary))', color: 'hsl(var(--secondary-foreground))' }
           }
         >
-          My Creations {infiniteBottles.length > 0 && `(${infiniteBottles.length})`}
+          The Infinity Archives {infiniteBottles.length > 0 && `(${infiniteBottles.length})`}
         </button>
       </div>
 
@@ -187,7 +188,9 @@ export default function Library() {
         ) : filteredBottles.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-muted-foreground font-body text-sm">
-              {bottles.length === 0 ? 'Your library awaits its first entry.' : 'No bottles match this filter.'}
+              {showCreations
+                ? 'No saved blends yet. Visit The Alchemist to create your first Infinity blend.'
+                : bottles.length === 0 ? 'Your library awaits its first entry.' : 'No bottles match this filter.'}
             </p>
           </div>
         ) : (
@@ -200,12 +203,19 @@ export default function Library() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                 >
-                  <BottleCard
-                    bottle={bottle}
-                    onEdit={handleEdit}
-                    onDelete={(b) => deleteMutation.mutate(b.id)}
-                    onToggleStatus={handleToggleStatus}
-                  />
+                  {bottle.is_infinity_blend ? (
+                    <InfinityArchiveCard
+                      bottle={bottle}
+                      onDelete={(b) => deleteMutation.mutate(b.id)}
+                    />
+                  ) : (
+                    <BottleCard
+                      bottle={bottle}
+                      onEdit={handleEdit}
+                      onDelete={(b) => deleteMutation.mutate(b.id)}
+                      onToggleStatus={handleToggleStatus}
+                    />
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

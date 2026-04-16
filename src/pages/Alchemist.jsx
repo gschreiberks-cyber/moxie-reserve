@@ -197,6 +197,7 @@ export default function Alchemist() {
   });
 
   const openBottles = bottles.filter(b => b.status === 'Open' && !b.is_infinity_blend);
+  const infinityBlends = bottles.filter(b => b.is_infinity_blend);
   const idleFill = Math.min(0.3, openBottles.length / 6 * 0.3);
 
   const handleGenerate = () => {
@@ -216,6 +217,10 @@ export default function Alchemist() {
 
   const handleSave = () => {
     if (!blend) return;
+    if (!isPremium && infinityBlends.length >= 1) {
+      toast.error('Free tier allows 1 saved blend. Upgrade to Premium for unlimited Infinity Archives.');
+      return;
+    }
     const names = blend.items.map(i => i.bottle.bottle_name).join(' + ');
     const label = BLEND_TYPES.find(t => t.id === blend.blendTypeId)?.label || 'Blend';
     saveMutation.mutate({
@@ -230,6 +235,10 @@ export default function Alchemist() {
   };
 
   const handleApexSave = (items, marryingTime, label) => {
+    if (!isPremium && infinityBlends.length >= 1) {
+      toast.error('Free tier allows 1 saved blend. Upgrade to Premium for unlimited Infinity Archives.');
+      return;
+    }
     const names = items.map(i => i.bottle.bottle_name).join(' + ');
     saveMutation.mutate({
       bottle_name: `Infinity: ${names}`,
