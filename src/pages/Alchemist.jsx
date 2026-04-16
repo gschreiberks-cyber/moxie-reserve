@@ -53,13 +53,12 @@ function shuffle(arr) {
 }
 
 // ── Build oz ratios from a selected bottle list ──────────────────────────────
-function buildItems(selected) {
-  const batchOz = 25.4; // ~750ml
+function buildItems(selected, capacityOz = 25.4) {
   const weights = selected.map(b => (b.proof || 90) + Math.random() * 15);
   const totalW = weights.reduce((s, w) => s + w, 0);
 
   let items = selected.map((bottle, i) => {
-    const oz = Math.round((weights[i] / totalW) * batchOz * 2) / 2; // nearest 0.5
+    const oz = Math.round((weights[i] / totalW) * capacityOz * 2) / 2; // nearest 0.5
     return { bottle, oz };
   });
 
@@ -79,7 +78,13 @@ function buildItems(selected) {
 }
 
 // ── True master-distiller blend logic ───────────────────────────────────────
-function generateBlend(openBottles, blendTypeId) {
+const CAPACITY_OPTIONS = [
+  { label: '50%', sub: 'The Foundation', oz: 12.7 },
+  { label: '75%', sub: 'The Progression', oz: 19.05 },
+  { label: '100%', sub: 'The Masterpiece', oz: 25.4 },
+];
+
+function generateBlend(openBottles, blendTypeId, capacityOz = 25.4) {
   const cores    = shuffle(openBottles.filter(b => b.rarity === 'Core'));
   const premiers = shuffle(openBottles.filter(b => b.rarity === 'Premier'));
   const vestiges = shuffle(openBottles.filter(b => b.rarity === 'Vestige'));
@@ -106,7 +111,7 @@ function generateBlend(openBottles, blendTypeId) {
     return null;
   }
 
-  return { items: buildItems(selected), marryingTime, blendTypeId };
+  return { items: buildItems(selected, capacityOz), marryingTime, blendTypeId };
 }
 
 // ── Role badge for each bottle in the recipe ───────────────────────────────
@@ -119,6 +124,34 @@ function roleBadge(blendTypeId, idx) {
     return 'Bolster';
   }
   return '';
+}
+
+// ── Capacity Selector pill-toggle ───────────────────────────────────────────
+function CapacitySelector({ value, onChange }) {
+  return (
+    <div className="mb-5">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mb-2">Target Capacity</p>
+      <div className="flex gap-2">
+        {CAPACITY_OPTIONS.map(opt => {
+          const active = value === opt.oz;
+          return (
+            <button
+              key={opt.label}
+              onClick={() => onChange(opt.oz)}
+              className="flex-1 py-2 px-1 rounded-md border text-center transition-all duration-200"
+              style={active
+                ? { borderColor: 'rgba(212,175,55,0.6)', background: 'rgba(212,175,55,0.08)' }
+                : { borderColor: 'hsl(var(--border))', background: 'transparent' }
+              }
+            >
+              <p className={`font-body text-xs font-medium ${active ? 'text-primary' : 'text-foreground'}`}>{opt.label}</p>
+              <p className="text-[9px] text-muted-foreground font-body leading-tight mt-0.5">{opt.sub}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function RecipeCard({ result, onSave, onRegenerate }) {
@@ -152,11 +185,11 @@ function RecipeCard({ result, onSave, onRegenerate }) {
             transition={{ delay: idx * 0.08 }}
             className="flex items-center gap-3"
           >
-            <div className="w-12 text-right shrink-0">
+            <div className="w-14 text-right shrink-0">
               <span className="font-heading text-xl" style={{ color: '#D4AF37', textShadow: '0 0 10px rgba(212,175,55,0.3)' }}>
-                {item.oz}
+                {item.oz.toFixed(1)}
               </span>
-              <span className="text-[10px] text-muted-foreground ml-0.5">oz</span>
+              <span className="text-[10px] text-muted-foreground ml-1">oz</span>
             </div>
             <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, rgba(212,175,55,${0.1 + item.ratio * 0.4}), transparent)` }} />
             <div className="flex-1 min-w-0">
@@ -172,7 +205,7 @@ function RecipeCard({ result, onSave, onRegenerate }) {
       <div className="px-5 pb-5 space-y-3">
         <div className="flex justify-between text-xs font-body pt-3 border-t border-border">
           <span className="text-muted-foreground uppercase tracking-widest">Batch Total</span>
-          <span className="text-foreground">{totalOz} oz · 750ml</span>
+          <span className="text-foreground">{totalOz} oz</span>
         </div>
         <CurationTimeline blendTypeId={result.blendTypeId} />
         <MashBill items={result.items} />
@@ -190,6 +223,7 @@ export default function Alchemist() {
   const [blend, setBlend] = useState(null);
   const [showApex, setShowApex] = useState(false);
   const [decanterFill, setDecanterFill] = useState(0);
+  const [capacityOz, setCapacityOz] = useState(25.4);
   const { isPremium } = usePremium();
   const queryClient = useQueryClient();
 
@@ -211,7 +245,7 @@ export default function Alchemist() {
   const idleFill = Math.min(0.3, openBottles.length / 6 * 0.3);
 
   const handleGenerate = () => {
-    const result = generateBlend(openBottles, selectedType);
+    const result = generateBlend(openBottles, selectedType, capacityOz);
     if (!result) {
       const type = BLEND_TYPES.find(t => t.id === selectedType);
       const req =
@@ -360,6 +394,8 @@ export default function Alchemist() {
             {selectedType === 'premier' && <p>Requires 1 open <span className="text-foreground">Core</span> ({coresCount}) + 1–3 open <span className="text-foreground">Premier</span> ({premiersCount}).</p>}
             {selectedType === 'vestige' && <p>Requires 1 <span className="text-foreground">Core</span> ({coresCount}) · 2 <span className="text-foreground">Premier</span> ({premiersCount}) · 1 <span className="text-foreground">Vestige</span> ({vestgesCount}).</p>}
           </div>
+
+          <CapacitySelector value={capacityOz} onChange={(oz) => { setCapacityOz(oz); setBlend(null); }} />
 
           <Button
             onClick={handleGenerate}

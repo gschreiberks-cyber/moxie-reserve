@@ -4,16 +4,19 @@ import { X, Shuffle, Hand, Check, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import CurationTimeline from '@/components/alchemist/CurationTimeline';
+import MashBill from '@/components/alchemist/MashBill';
 
-const VOLUME_MAP = { Full: 750, Half: 375, Quarter: 185 };
+const CAPACITY_OPTIONS = [
+  { label: '50%', sub: 'The Foundation', oz: 12.7 },
+  { label: '75%', sub: 'The Progression', oz: 19.05 },
+  { label: '100%', sub: 'The Masterpiece', oz: 25.4 },
+];
 
-function buildRatios(selected) {
-  const batchOz = 25.4; // ~750ml
+function buildRatios(selected, capacityOz = 25.4) {
   const weights = selected.map(b => (b.proof || 90) + Math.random() * 10);
   const totalW = weights.reduce((s, w) => s + w, 0);
   let items = selected.map((bottle, i) => {
-    const ratio = weights[i] / totalW;
-    const oz = Math.round(ratio * batchOz * 2) / 2; // nearest 0.5
+    const oz = Math.round((weights[i] / totalW) * capacityOz * 2) / 2;
     return { bottle, oz };
   });
   const totalOz = items.reduce((s, i) => s + i.oz, 0) || 1;
@@ -27,8 +30,65 @@ function buildRatios(selected) {
   return items;
 }
 
+// Phase label for each bottle position in the Velvet Marriage output
+function apexPhaseLabel(idx, rarity) {
+  if (idx === 0) return `Phase 1 Foundation`;
+  if (idx === 1 || idx === 2) return `Phase 2 Enhancement`;
+  return `Phase 3 The Crown`;
+}
+
+// ── Capacity Selector ────────────────────────────────────────────────────────
+function CapacitySelector({ value, onChange }) {
+  return (
+    <div className="mb-5">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mb-2">Target Capacity</p>
+      <div className="flex gap-2">
+        {CAPACITY_OPTIONS.map(opt => {
+          const active = value === opt.oz;
+          return (
+            <button
+              key={opt.label}
+              onClick={() => onChange(opt.oz)}
+              className="flex-1 py-2 px-1 rounded-md border text-center transition-all duration-200"
+              style={active
+                ? { borderColor: 'rgba(212,175,55,0.6)', background: 'rgba(212,175,55,0.08)' }
+                : { borderColor: 'hsl(var(--border))', background: 'transparent' }
+              }
+            >
+              <p className={`font-body text-xs font-medium ${active ? 'text-primary' : 'text-foreground'}`}>{opt.label}</p>
+              <p className="text-[9px] text-muted-foreground font-body leading-tight mt-0.5">{opt.sub}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Recipe output rows shared between Bespoke & Algorithmic ─────────────────
+function RecipeRows({ items, showPhases }) {
+  return (
+    <>
+      {items.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-3">
+          <span className="font-heading text-base w-14 text-right shrink-0" style={{ color: '#D4AF37' }}>
+            {item.oz.toFixed(1)} <span className="text-[10px] text-muted-foreground font-body">oz</span>
+          </span>
+          <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, rgba(212,175,55,${0.1 + item.ratio * 0.5}), transparent)` }} />
+          <div className="flex-1 min-w-0">
+            <p className="font-body text-xs text-foreground truncate">{item.bottle.bottle_name}</p>
+            <p className="text-[10px] text-muted-foreground font-body">
+              {showPhases ? `${apexPhaseLabel(idx, item.bottle.rarity)} · ` : ''}{item.percentage}% · {item.bottle.rarity}
+            </p>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 // ── Bespoke Formulation ──────────────────────────────────────────────────────
-function BespokeFormulation({ openBottles, onSave }) {
+function BespokeFormulation({ openBottles, onSave, capacityOz }) {
   const [selected, setSelected] = useState([]);
 
   const toggle = (bottle) => {
@@ -39,7 +99,8 @@ function BespokeFormulation({ openBottles, onSave }) {
     );
   };
 
-  const items = selected.length > 0 ? buildRatios(selected) : [];
+  const items = selected.length > 0 ? buildRatios(selected, capacityOz) : [];
+  const totalOz = items.reduce((s, i) => s + i.oz, 0).toFixed(1);
 
   const rarityColor = { Core: '#A9A9A9', Premier: '#D4AF37', Vestige: '#B87333' };
 
@@ -48,7 +109,7 @@ function BespokeFormulation({ openBottles, onSave }) {
       <p className="text-xs text-muted-foreground font-body">Select the expressions you wish to marry.</p>
 
       {/* Bottle selector */}
-      <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
         {openBottles.map(bottle => {
           const active = !!selected.find(b => b.id === bottle.id);
           return (
@@ -77,14 +138,13 @@ function BespokeFormulation({ openBottles, onSave }) {
       {items.length > 0 && (
         <div className="border border-border rounded-md p-4 space-y-3" style={{ background: 'rgba(212,175,55,0.03)' }}>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body">Proposed Ratios</p>
-          {items.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-3">
-              <span className="font-heading text-base w-10 text-right shrink-0" style={{ color: '#D4AF37' }}>{item.oz}oz</span>
-              <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, rgba(212,175,55,${0.1 + item.ratio * 0.5}), transparent)` }} />
-              <p className="font-body text-xs text-foreground truncate flex-1">{item.bottle.bottle_name}</p>
-            </div>
-          ))}
+          <RecipeRows items={items} showPhases={true} />
+          <div className="flex justify-between text-xs font-body pt-2 border-t border-border">
+            <span className="text-muted-foreground uppercase tracking-widest">Batch Total</span>
+            <span className="text-foreground">{totalOz} oz</span>
+          </div>
           <CurationTimeline blendTypeId="apex" />
+          <MashBill items={items} />
           <Button
             onClick={() => onSave(items, '74–89 Days', 'Apex — Bespoke Formulation')}
             className="w-full gold-btn text-xs uppercase tracking-widest font-body"
@@ -100,17 +160,15 @@ function BespokeFormulation({ openBottles, onSave }) {
 }
 
 // ── Algorithmic Curation ─────────────────────────────────────────────────────
-function AlgorithmicCuration({ openBottles, onSave }) {
+function AlgorithmicCuration({ openBottles, onSave, capacityOz }) {
   const [sweetness, setSweetness] = useState([50]);
   const [spice, setSpice] = useState([50]);
   const [heat, setHeat] = useState([50]);
   const [result, setResult] = useState(null);
 
   const curate = () => {
-    // Score each bottle against profile
     const scored = openBottles.map(bottle => {
       const proofScore = Math.abs((bottle.proof || 90) - (60 + heat[0] * 0.9));
-      // Core = sweet-leaning, Vestige = spice, Premier = balanced
       const rarityScore =
         bottle.rarity === 'Core'    ? Math.abs(sweetness[0] - 70) :
         bottle.rarity === 'Vestige' ? Math.abs(spice[0] - 70) :
@@ -120,7 +178,7 @@ function AlgorithmicCuration({ openBottles, onSave }) {
 
     const sorted = scored.sort((a, b) => a.score - b.score);
     const selected = sorted.slice(0, Math.min(4, sorted.length)).map(s => s.bottle);
-    const items = buildRatios(selected);
+    const items = buildRatios(selected, capacityOz);
 
     const marryDays = 14 + Math.round((sweetness[0] + spice[0] + heat[0]) / 3 * 0.31);
     setResult({ items, marryingTime: `${marryDays}–${marryDays + 14} Days` });
@@ -131,6 +189,8 @@ function AlgorithmicCuration({ openBottles, onSave }) {
     { label: 'Spice / Rye', left: 'Mild', right: 'Bold', value: spice, onChange: setSpice },
     { label: 'Heat / Proof', left: 'Low', right: 'High', value: heat, onChange: setHeat },
   ];
+
+  const totalOz = result ? result.items.reduce((s, i) => s + i.oz, 0).toFixed(1) : '0.0';
 
   return (
     <div className="space-y-5">
@@ -161,19 +221,15 @@ function AlgorithmicCuration({ openBottles, onSave }) {
           style={{ background: 'rgba(212,175,55,0.03)' }}
         >
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body">Curated Recipe</p>
-          {result.items.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-3">
-              <span className="font-heading text-base w-10 text-right shrink-0" style={{ color: '#D4AF37' }}>{item.oz}oz</span>
-              <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, rgba(212,175,55,${0.1 + item.ratio * 0.5}), transparent)` }} />
-              <div className="flex-1 min-w-0">
-                <p className="font-body text-xs text-foreground truncate">{item.bottle.bottle_name}</p>
-                <p className="text-[10px] text-muted-foreground font-body">{item.percentage}% · {item.bottle.rarity}</p>
-              </div>
-            </div>
-          ))}
+          <RecipeRows items={result.items} showPhases={true} />
+          <div className="flex justify-between text-xs font-body pt-2 border-t border-border">
+            <span className="text-muted-foreground uppercase tracking-widest">Batch Total</span>
+            <span className="text-foreground">{totalOz} oz</span>
+          </div>
           <CurationTimeline blendTypeId="apex" />
+          <MashBill items={result.items} />
           <Button
-            onClick={() => onSave(result.items, '74–89 Days', 'Apex — Algorithmic Curation')}
+            onClick={() => onSave(result.items, result.marryingTime, 'Apex — Algorithmic Curation')}
             className="w-full gold-btn text-xs uppercase tracking-widest font-body"
           >
             <Save className="w-4 h-4 mr-2" />
@@ -187,7 +243,8 @@ function AlgorithmicCuration({ openBottles, onSave }) {
 
 // ── Apex Blend Modal ─────────────────────────────────────────────────────────
 export default function ApexBlend({ openBottles, onSave, onClose }) {
-  const [mode, setMode] = useState(null); // null | 'bespoke' | 'algorithmic'
+  const [mode, setMode] = useState(null);
+  const [capacityOz, setCapacityOz] = useState(25.4);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/90 backdrop-blur-sm">
@@ -213,6 +270,10 @@ export default function ApexBlend({ openBottles, onSave, onClose }) {
         </div>
 
         <div className="overflow-y-auto px-5 py-5" style={{ maxHeight: 'calc(90vh - 72px)' }}>
+
+          {/* Capacity selector always visible */}
+          <CapacitySelector value={capacityOz} onChange={(oz) => setCapacityOz(oz)} />
+
           {/* Mode selection */}
           {!mode && (
             <div className="space-y-4">
@@ -256,7 +317,7 @@ export default function ApexBlend({ openBottles, onSave, onClose }) {
               >
                 ← Back
               </button>
-              <BespokeFormulation openBottles={openBottles} onSave={onSave} />
+              <BespokeFormulation openBottles={openBottles} onSave={onSave} capacityOz={capacityOz} />
             </div>
           )}
 
@@ -268,7 +329,7 @@ export default function ApexBlend({ openBottles, onSave, onClose }) {
               >
                 ← Back
               </button>
-              <AlgorithmicCuration openBottles={openBottles} onSave={onSave} />
+              <AlgorithmicCuration openBottles={openBottles} onSave={onSave} capacityOz={capacityOz} />
             </div>
           )}
         </div>
