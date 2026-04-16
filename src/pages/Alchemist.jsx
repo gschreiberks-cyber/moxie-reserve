@@ -42,29 +42,63 @@ const BLEND_TYPES = [
   },
 ];
 
+// ── Fisher-Yates shuffle ─────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Build oz ratios from a selected bottle list ──────────────────────────────
+function buildItems(selected) {
+  const batchOz = 25.4; // ~750ml
+  const weights = selected.map(b => (b.proof || 90) + Math.random() * 15);
+  const totalW = weights.reduce((s, w) => s + w, 0);
+
+  let items = selected.map((bottle, i) => {
+    const oz = Math.round((weights[i] / totalW) * batchOz * 2) / 2; // nearest 0.5
+    return { bottle, oz };
+  });
+
+  const totalOz = items.reduce((s, i) => s + i.oz, 0) || 1;
+  items = items.map(i => ({
+    ...i,
+    ratio: i.oz / totalOz,
+    percentage: Math.round((i.oz / totalOz) * 100),
+  }));
+
+  // Fix rounding drift on largest item
+  const drift = 100 - items.reduce((s, i) => s + i.percentage, 0);
+  const maxIdx = items.reduce((mi, it, idx) => it.oz > items[mi].oz ? idx : mi, 0);
+  items[maxIdx].percentage += drift;
+
+  return items;
+}
+
 // ── True master-distiller blend logic ───────────────────────────────────────
 function generateBlend(openBottles, blendTypeId) {
-  const cores    = openBottles.filter(b => b.rarity === 'Core');
-  const premiers = openBottles.filter(b => b.rarity === 'Premier');
-  const vestiges = openBottles.filter(b => b.rarity === 'Vestige');
+  const cores    = shuffle(openBottles.filter(b => b.rarity === 'Core'));
+  const premiers = shuffle(openBottles.filter(b => b.rarity === 'Premier'));
+  const vestiges = shuffle(openBottles.filter(b => b.rarity === 'Vestige'));
 
   let selected = [];
   let marryingTime = '';
 
   if (blendTypeId === 'core') {
-    // 2–3 Core bourbons
     if (cores.length < 2) return null;
-    selected = cores.slice(0, Math.min(3, cores.length));
+    // Randomly pick 2 or 3
+    const count = cores.length >= 3 && Math.random() > 0.4 ? 3 : 2;
+    selected = cores.slice(0, count);
     marryingTime = '7–14 Days';
   } else if (blendTypeId === 'premier') {
-    // 1 Core foundation + 1–3 Premier enhancements
     if (cores.length < 1 || premiers.length < 1) return null;
-    const foundation = cores.slice(0, 1);
-    const enhancements = premiers.slice(0, Math.min(3, premiers.length));
-    selected = [...foundation, ...enhancements];
+    const enhancementCount = Math.min(premiers.length, Math.floor(Math.random() * 3) + 1); // 1–3
+    selected = [cores[0], ...premiers.slice(0, enhancementCount)];
     marryingTime = '14–30 Days';
   } else if (blendTypeId === 'vestige') {
-    // 1 Core + 2 Premier + 1 Vestige
     if (cores.length < 1 || premiers.length < 2 || vestiges.length < 1) return null;
     selected = [cores[0], premiers[0], premiers[1], vestiges[0]];
     marryingTime = '30–45 Days';
@@ -72,31 +106,7 @@ function generateBlend(openBottles, blendTypeId) {
     return null;
   }
 
-  // Build ratios weighted by proof, round oz to nearest 0.5
-  const weights = selected.map(b => (b.proof || 90) + Math.random() * 8);
-  const totalW = weights.reduce((s, w) => s + w, 0);
-  const batchOz = 25.4; // ~750ml total
-
-  let items = selected.map((bottle, i) => {
-    const ratio = weights[i] / totalW;
-    const rawOz = ratio * batchOz;
-    const oz = Math.round(rawOz * 2) / 2; // round to nearest 0.5
-    return { bottle, ratio, oz };
-  });
-
-  // Recalculate percentages from rounded oz values
-  const totalOz = items.reduce((s, i) => s + i.oz, 0) || 1;
-  items = items.map(i => ({
-    ...i,
-    percentage: Math.round((i.oz / totalOz) * 100),
-    ratio: i.oz / totalOz,
-  }));
-
-  // Fix percentage rounding drift
-  const pctDiff = 100 - items.reduce((s, i) => s + i.percentage, 0);
-  items[0].percentage += pctDiff;
-
-  return { items, marryingTime, blendTypeId };
+  return { items: buildItems(selected), marryingTime, blendTypeId };
 }
 
 // ── Role badge for each bottle in the recipe ───────────────────────────────

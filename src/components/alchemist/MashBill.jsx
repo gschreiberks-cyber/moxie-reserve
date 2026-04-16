@@ -1,16 +1,28 @@
 import React from 'react';
 
 // Approximate mash bill profiles by distillery / bottle name keywords
+// Grain 3 = Barley (malted) for standard bourbon, or Wheat for wheated expressions
+// We map: Corn / Rye (or Wheat used as Rye slot) / Barley
 const MASH_PROFILES = [
-  { match: /weller|van winkle|pappy|w\.l\. weller/i,         corn: 70, rye: 16, barley: 14 },
-  { match: /buffalo trace|eagle rare|e\.h\. taylor|blanton/i, corn: 75, rye: 10, barley: 15 },
+  // Wheated bourbons — Maker's Mark: 70% Corn, 16% Wheat, 14% Barley
+  { match: /maker|maker's mark/i,                              corn: 70, rye: 16, barley: 14 },
+  // Wheated — Weller / Pappy / Van Winkle: 70% Corn, 16% Wheat, 14% Barley
+  { match: /weller|van winkle|pappy|w\.l\. weller|william larue/i, corn: 70, rye: 16, barley: 14 },
+  // Evan Williams BIB / Elijah Craig / Heaven Hill: 78% Corn, 10% Rye, 12% Barley
+  { match: /evan williams|elijah craig|heaven hill|larceny/i,  corn: 78, rye: 10, barley: 12 },
+  // Buffalo Trace / Eagle Rare / Blanton's / E.H. Taylor: 75% Corn, 10% Rye, 15% Barley
+  { match: /buffalo trace|eagle rare|e\.h\. taylor|blanton/i,  corn: 75, rye: 10, barley: 15 },
+  // Four Roses: 75% Corn, 20% Rye, 5% Barley
   { match: /four roses/i,                                      corn: 75, rye: 20, barley: 5  },
+  // Wild Turkey / Russell's: 75% Corn, 13% Rye, 12% Barley
   { match: /wild turkey|russell/i,                             corn: 75, rye: 13, barley: 12 },
+  // Jim Beam family: 77% Corn, 13% Rye, 10% Barley
   { match: /booker|knob creek|jim beam|basil hayden/i,         corn: 77, rye: 13, barley: 10 },
-  { match: /maker|maker's/i,                                   corn: 70, rye: 14, barley: 16 },
+  // Woodford / Old Forester: 72% Corn, 18% Rye, 10% Barley
   { match: /woodford|old forester/i,                           corn: 72, rye: 18, barley: 10 },
+  // Michter's: 78% Corn, 10% Rye, 12% Barley
   { match: /michter/i,                                         corn: 78, rye: 10, barley: 12 },
-  { match: /elijah craig|heaven hill|larceny/i,                corn: 78, rye: 10, barley: 12 },
+  // Buffalo Trace Antique: 75% Corn, 15% Rye, 10% Barley
   { match: /handy|sazerac|stagg|george t/i,                    corn: 75, rye: 15, barley: 10 },
 ];
 
