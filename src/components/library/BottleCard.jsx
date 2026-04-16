@@ -9,9 +9,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const rarityStyles = {
-  Core: 'bg-muted text-muted-foreground border-border',
-  Premier: 'bg-primary/10 text-primary border-primary/30',
-  Vestige: 'bg-accent/10 text-accent border-accent/30',
+  Core:    { color: '#A9A9A9', border: 'rgba(169,169,169,0.25)', bg: 'rgba(169,169,169,0.06)' },
+  Premier: { color: '#D4AF37', border: 'rgba(212,175,55,0.30)',  bg: 'rgba(212,175,55,0.06)'  },
+  Vestige: { color: '#B87333', border: 'rgba(184,115,51,0.30)',  bg: 'rgba(184,115,51,0.06)'  },
 };
 
 export default function BottleCard({ bottle, onEdit, onDelete, onToggleStatus }) {
@@ -20,12 +20,17 @@ export default function BottleCard({ bottle, onEdit, onDelete, onToggleStatus })
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Badge
-              variant="outline"
-              className={`text-[10px] uppercase tracking-widest font-body ${rarityStyles[bottle.rarity] || rarityStyles.Core}`}
-            >
-              {bottle.rarity || 'Core'}
-            </Badge>
+            {(() => {
+              const s = rarityStyles[bottle.rarity] || rarityStyles.Core;
+              return (
+                <span
+                  className="text-[10px] uppercase tracking-widest font-body px-2 py-0.5 rounded border"
+                  style={{ color: s.color, borderColor: s.border, background: s.bg }}
+                >
+                  {bottle.rarity || 'Core'}
+                </span>
+              );
+            })()}
             <span className={`w-2 h-2 rounded-full ${bottle.status === 'Open' ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
           </div>
           <h3 className="font-heading text-lg text-foreground truncate mt-2">

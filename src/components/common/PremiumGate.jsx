@@ -17,7 +17,7 @@ export default function PremiumGate({ bottleCount, isPremium, children }) {
       </p>
       <Link to="/settings">
         <Button className="gold-btn font-body text-xs uppercase tracking-widest">
-          Unlock Premium
+          <span className="gold-text">Unlock Premium</span>
         </Button>
       </Link>
     </div>

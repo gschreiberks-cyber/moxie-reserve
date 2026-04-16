@@ -20,40 +20,97 @@ const BLEND_TYPES = [
   { id: 'marriage', label: 'Complex Marriage', tiers: ['Core','Premier','Vestige'],premium: true,  desc: 'A perfectly ratioed infinity blend across all tiers.' },
 ];
 
-function decanterSvg(fillLevel = 0.5) {
-  const maxFill = 60;
-  const fillHeight = maxFill * fillLevel;
+function DecanterSvg({ fillLevel = 0, animated = false }) {
+  const maxFill = 62;
+  const fillHeight = maxFill * Math.max(0, Math.min(1, fillLevel));
   const fillY = 84 - fillHeight;
+
   return (
-    <svg width="100" height="120" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="120" height="140" viewBox="0 0 72 92" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="goldGrad2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#E1C16E" />
-          <stop offset="100%" stopColor="#D4AF37" />
+        <linearGradient id="goldGradD" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#E8D48B" />
+          <stop offset="100%" stopColor="#C9922A" />
         </linearGradient>
-        <linearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8B5E0A" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#5c3d08" stopOpacity="0.8" />
+        <linearGradient id="amberGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#DAA520" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="#8B4513" stopOpacity="0.92" />
         </linearGradient>
-        <clipPath id="decanterClip">
-          <path d="M28 12 L22 30 C14 42 10 52 10 62 C10 76 22 84 36 84 C50 84 62 76 62 62 C62 52 58 42 50 30 L44 12 Z" />
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#0B0B0B" stopOpacity="0.0" />
+          <stop offset="40%" stopColor="#1a1410" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#0B0B0B" stopOpacity="0.0" />
+        </linearGradient>
+        {/* Crystal facets */}
+        <clipPath id="crystalClip">
+          <path d="M29 13 L23 31 C15 44 11 54 11 64 C11 77 22 86 36 86 C50 86 61 77 61 64 C61 54 57 44 49 31 L43 13 Z" />
         </clipPath>
-        <filter id="glowGold">
-          <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="goldGlow">
+          <feGaussianBlur stdDeviation="1.8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="liquidGlow">
+          <feGaussianBlur stdDeviation="1" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
-      {/* Liquid fill */}
-      <rect x="0" y={fillY} width="72" height={fillHeight} fill="url(#liquidGrad)" clipPath="url(#decanterClip)" />
-      {/* Decanter body */}
-      <path d="M28 12 L22 30 C14 42 10 52 10 62 C10 76 22 84 36 84 C50 84 62 76 62 62 C62 52 58 42 50 30 L44 12 Z"
-        fill="none" stroke="url(#goldGrad2)" strokeWidth="1.5" filter="url(#glowGold)" />
+
+      {/* Crystal body fill (glass tint) */}
+      <path
+        d="M29 13 L23 31 C15 44 11 54 11 64 C11 77 22 86 36 86 C50 86 61 77 61 64 C61 54 57 44 49 31 L43 13 Z"
+        fill="url(#bodyGrad)"
+      />
+
+      {/* Liquid amber fill — animates height */}
+      <motion.rect
+        x="0" width="72"
+        initial={{ y: 86, height: 0 }}
+        animate={{ y: fillY, height: fillHeight }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
+        fill="url(#amberGrad)"
+        clipPath="url(#crystalClip)"
+        filter="url(#liquidGlow)"
+      />
+
+      {/* Surface shimmer line on liquid */}
+      {fillLevel > 0.05 && (
+        <motion.line
+          x1="13" x2="59"
+          initial={{ y1: 86, y2: 86, opacity: 0 }}
+          animate={{ y1: fillY, y2: fillY, opacity: 0.4 }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
+          stroke="#DAA520"
+          strokeWidth="0.8"
+          strokeDasharray="4 3"
+        />
+      )}
+
+      {/* Crystal facet lines for depth */}
+      <line x1="36" y1="13" x2="29" y2="40" stroke="#D4AF37" strokeWidth="0.4" opacity="0.2" />
+      <line x1="36" y1="13" x2="43" y2="40" stroke="#D4AF37" strokeWidth="0.4" opacity="0.2" />
+      <line x1="22" y1="54" x2="14" y2="68" stroke="#D4AF37" strokeWidth="0.4" opacity="0.15" />
+      <line x1="50" y1="54" x2="58" y2="68" stroke="#D4AF37" strokeWidth="0.4" opacity="0.15" />
+
+      {/* Decanter body outline */}
+      <path
+        d="M29 13 L23 31 C15 44 11 54 11 64 C11 77 22 86 36 86 C50 86 61 77 61 64 C61 54 57 44 49 31 L43 13 Z"
+        fill="none"
+        stroke="url(#goldGradD)"
+        strokeWidth="1.4"
+        filter="url(#goldGlow)"
+      />
+
       {/* Neck */}
-      <rect x="28" y="4" width="16" height="12" rx="2" fill="none" stroke="url(#goldGrad2)" strokeWidth="1.5" filter="url(#glowGold)" />
-      {/* Stopper */}
-      <ellipse cx="36" cy="4" rx="8" ry="3.5" fill="none" stroke="url(#goldGrad2)" strokeWidth="1.5" filter="url(#glowGold)" />
-      {/* Shine */}
-      <path d="M25 35 Q27 50 26 62" fill="none" stroke="#E1C16E" strokeWidth="0.8" opacity="0.35" />
+      <rect x="29" y="5" width="14" height="11" rx="2"
+        fill="none" stroke="url(#goldGradD)" strokeWidth="1.4" filter="url(#goldGlow)" />
+
+      {/* Stopper ball */}
+      <ellipse cx="36" cy="3" rx="7" ry="3"
+        fill="none" stroke="url(#goldGradD)" strokeWidth="1.4" filter="url(#goldGlow)" />
+
+      {/* Left-side highlight shine */}
+      <path d="M24 36 Q26 52 25 65" fill="none" stroke="#E8D48B" strokeWidth="0.7" opacity="0.3" />
+      <path d="M30 20 Q31 28 30 36" fill="none" stroke="#E8D48B" strokeWidth="0.5" opacity="0.2" />
     </svg>
   );
 }
@@ -191,6 +248,7 @@ export default function Alchemist() {
   });
 
   const openBottles = bottles.filter(b => b.status === 'Open' && !b.is_infinity_blend);
+  const [decanterFill, setDecanterFill] = useState(0);
 
   const handleGenerate = () => {
     const type = BLEND_TYPES.find(t => t.id === selectedType);
@@ -200,6 +258,8 @@ export default function Alchemist() {
       return;
     }
     setBlend(result);
+    // Animate fill to a level based on complexity (0.4 – 0.9)
+    setDecanterFill(0.4 + (complexity[0] / 100) * 0.5);
   };
 
   const handleSave = () => {
@@ -216,8 +276,8 @@ export default function Alchemist() {
     });
   };
 
-  // Fill level based on open bottles
-  const fillLevel = Math.min(1, openBottles.length / 6);
+  // Idle fill level based on open bottles (before a blend is composed)
+  const idleFill = Math.min(0.35, openBottles.length / 6 * 0.35);
 
   return (
     <div className="px-4 pt-6 max-w-lg mx-auto">
@@ -232,15 +292,15 @@ export default function Alchemist() {
       </div>
 
       {/* Decanter visual */}
-      <div className="flex flex-col items-center py-6">
+      <div className="flex flex-col items-center py-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
         >
-          {decanterSvg(fillLevel)}
+          <DecanterSvg fillLevel={blend ? decanterFill : idleFill} animated={!!blend} />
         </motion.div>
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mt-2">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mt-1">
           {openBottles.length} open expression{openBottles.length !== 1 ? 's' : ''} available
         </p>
       </div>

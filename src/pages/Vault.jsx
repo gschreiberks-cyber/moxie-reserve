@@ -1,11 +1,26 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, TrendingDown, TrendingUp, Minus, X } from 'lucide-react';
+import { Plus, Trash2, TrendingDown, TrendingUp, Minus, X, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AnimatePresence, motion } from 'framer-motion';
+
+// Predictable annual releases calendar
+const HORIZON_RELEASES = [
+  { month: 'January',   bottle_name: 'Old Forester Birthday Bourbon',        notes: 'Annual birthday release, limited allocation' },
+  { month: 'March',     bottle_name: 'Jefferson\'s Ocean Voyage',             notes: 'Sea-aged expression, rotating voyages' },
+  { month: 'May',       bottle_name: 'Four Roses Limited Small Batch',        notes: 'Spring limited edition, retailer select' },
+  { month: 'June',      bottle_name: 'Blanton\'s Straight from the Barrel',   notes: 'Japanese export, periodic US drops' },
+  { month: 'August',    bottle_name: 'Maker\'s Mark Private Select',          notes: 'Annual stave-customized batch release' },
+  { month: 'September', bottle_name: 'Maker\'s Mark Cellar Aged',             notes: 'Fall release, store pick season opens' },
+  { month: 'October',   bottle_name: 'William Larue Weller',                  notes: 'BTAC — most allocated of the collection' },
+  { month: 'October',   bottle_name: 'Thomas H. Handy Sazerac',               notes: 'BTAC — uncut rye, high demand' },
+  { month: 'November',  bottle_name: 'Buffalo Trace Antique Collection',      notes: 'BTAC flagship drop — George T. Stagg, etc.' },
+  { month: 'November',  bottle_name: 'Pappy Van Winkle Family Reserve',       notes: 'Highly allocated, November lottery season' },
+  { month: 'December',  bottle_name: 'Elijah Craig Barrel Proof Batch C',     notes: 'Third batch of the year, holiday shelf hits' },
+];
 
 function VaultForm({ onSubmit, onCancel }) {
   const [form, setForm] = useState({ bottle_name: '', target_price: '', market_price: '', notes: '' });
@@ -66,7 +81,6 @@ function VaultForm({ onSubmit, onCancel }) {
 function PriceDelta({ target, market }) {
   if (!target || !market) return null;
   const delta = market - target;
-  const pct = Math.round((delta / target) * 100);
   if (delta > 0) return <span className="text-destructive text-xs font-body flex items-center gap-1"><TrendingUp className="w-3 h-3" />${delta} over target</span>;
   if (delta < 0) return <span className="text-green-500 text-xs font-body flex items-center gap-1"><TrendingDown className="w-3 h-3" />${Math.abs(delta)} under target</span>;
   return <span className="text-muted-foreground text-xs font-body flex items-center gap-1"><Minus className="w-3 h-3" />At target</span>;
@@ -91,8 +105,13 @@ export default function Vault() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wishlist'] }),
   });
 
+  const addFromHorizon = (release) => {
+    createMutation.mutate({ bottle_name: release.bottle_name, notes: `${release.month} release — ${release.notes}` });
+  };
+
   return (
     <div className="px-4 pt-6 max-w-lg mx-auto">
+      {/* Header */}
       <div className="mb-8">
         <p className="text-[10px] uppercase tracking-[0.3em] font-body mb-1" style={{ color: '#D4AF37' }}>
           Moxie Reserve
@@ -101,19 +120,65 @@ export default function Vault() {
         <p className="text-sm text-muted-foreground font-body mt-1">Your active hunt list. Track the chase.</p>
       </div>
 
-      <Button onClick={() => setShowForm(true)} className="w-full mb-6 gold-btn text-xs uppercase tracking-widest font-body">
-        <Plus className="w-4 h-4 mr-2" />
-        Add to the Hunt
-      </Button>
+      {/* ── The Horizon ── */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <Calendar className="w-4 h-4" style={{ color: '#D4AF37' }} />
+          <h2 className="font-heading text-lg text-foreground">The Horizon</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <p className="text-xs text-muted-foreground font-body mb-4">Predictable annual releases. Add to your Hunt with one tap.</p>
+
+        <div className="space-y-2">
+          {HORIZON_RELEASES.map((release, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.04 }}
+              className="flex items-center gap-3 p-3 rounded-md border border-border bg-card/50 group hover:border-primary/20 transition-all"
+            >
+              <div className="w-16 shrink-0">
+                <span className="text-[10px] uppercase tracking-widest font-body" style={{ color: '#D4AF37' }}>
+                  {release.month}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-heading text-sm text-foreground truncate">{release.bottle_name}</p>
+                <p className="text-[10px] text-muted-foreground/70 font-body truncate">{release.notes}</p>
+              </div>
+              <button
+                onClick={() => addFromHorizon(release)}
+                className="shrink-0 w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── My Hunt List ── */}
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="font-heading text-lg text-foreground">My Hunt</h2>
+        <div className="flex-1 h-px bg-border" />
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-body px-3 py-1.5 rounded-full border border-border hover:border-primary/40 hover:text-primary transition-all text-muted-foreground"
+        >
+          <Plus className="w-3 h-3" />
+          Add
+        </button>
+      </div>
 
       {isLoading ? (
         <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-card border border-border rounded-md animate-pulse" />)}</div>
       ) : wishlist.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="text-center py-10">
           <p className="text-muted-foreground font-body text-sm">No bottles on the hunt yet.</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 mb-8">
           <AnimatePresence>
             {wishlist.map(item => (
               <motion.div
