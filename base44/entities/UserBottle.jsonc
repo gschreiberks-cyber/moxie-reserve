@@ -1,0 +1,52 @@
+{
+  "name": "UserBottle",
+  "type": "object",
+  "properties": {
+    "distillery": {
+      "type": "string",
+      "description": "Name of the distillery"
+    },
+    "bottle_name": {
+      "type": "string",
+      "description": "Name of the bottle"
+    },
+    "age": {
+      "type": "number",
+      "description": "Age statement in years"
+    },
+    "proof": {
+      "type": "number",
+      "description": "Proof of the whiskey"
+    },
+    "purchase_price": {
+      "type": "number",
+      "description": "Purchase price in dollars"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Open",
+        "Closed"
+      ],
+      "default": "Closed",
+      "description": "Whether the bottle is open or closed"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "Core",
+        "Premier",
+        "Vestige"
+      ],
+      "default": "Core",
+      "description": "Rarity tier of the bottle"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Tasting notes or personal notes"
+    }
+  },
+  "required": [
+    "bottle_name"
+  ]
+}
