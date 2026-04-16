@@ -67,20 +67,33 @@ export default function Dashboard() {
 
   return (
     <div className="px-4 pt-8 pb-4 max-w-lg mx-auto">
-      {/* Header */}
+      {/* Header — Logo placeholder + title */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="mb-10"
+        className="mb-10 flex flex-col items-center text-center"
       >
+        {/* Logo placeholder */}
+        <div
+          className="w-20 h-20 rounded-full border-2 flex items-center justify-center mb-5"
+          style={{
+            borderColor: 'rgba(212,175,55,0.4)',
+            background: 'radial-gradient(circle, rgba(212,175,55,0.08) 0%, rgba(11,11,11,0) 70%)',
+            boxShadow: '0 0 24px rgba(212,175,55,0.12)',
+          }}
+        >
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-body text-center leading-tight px-2">
+            Logo<br />Here
+          </span>
+        </div>
         <p className="text-[10px] uppercase tracking-[0.4em] font-body mb-2" style={{ color: '#D4AF37' }}>
           Moxie Reserve
         </p>
         <h1 className="font-heading text-4xl text-foreground leading-tight">
           Your Collection
         </h1>
-        <div className="h-px w-12 mt-3" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
+        <div className="h-px w-12 mt-3 mx-auto" style={{ background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }} />
       </motion.div>
 
       {/* Stats Row */}
@@ -125,7 +138,7 @@ export default function Dashboard() {
         <QuickLink
           to="/vault"
           icon={Star}
-          label="The Vault"
+          label="The Pursuit"
           sub={`${wishlist.length} bottle${wishlist.length !== 1 ? 's' : ''} on the hunt`}
           delay={0.6}
         />

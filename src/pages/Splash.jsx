@@ -29,8 +29,22 @@ export default function Splash({ onComplete }) {
             transition={{ duration: 0.9, ease: 'easeOut' }}
             className="flex flex-col items-center"
           >
-            {/* Logo mark */}
-            <svg width="72" height="88" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-6">
+            {/* Logo placeholder ring */}
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+              style={{
+                border: '1.5px solid rgba(212,175,55,0.35)',
+                background: 'radial-gradient(circle, rgba(212,175,55,0.06) 0%, rgba(11,11,11,0) 70%)',
+                boxShadow: '0 0 28px rgba(212,175,55,0.12)',
+              }}
+            >
+              <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-body text-center leading-tight px-1">
+                Logo<br/>Here
+              </span>
+            </div>
+
+            {/* Decanter SVG mark */}
+            <svg width="56" height="68" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-6">
               <defs>
                 <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#E1C16E" />

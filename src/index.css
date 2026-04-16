@@ -93,6 +93,17 @@
   }
 }
 
+/* Dragon-glass decanter liquid pulse */
+@keyframes amberPulse {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 0.95; }
+}
+
+@keyframes surfaceShimmer {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -28; }
+}
+
 @layer components {
   .gold-btn {
     @apply font-body;

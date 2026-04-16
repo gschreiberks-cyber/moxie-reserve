@@ -102,17 +102,25 @@ export default function Library() {
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        {['All', 'Open', 'Closed', 'Core', 'Premier', 'Vestige'].map(f => (
+        {[
+          { label: 'All',     activeStyle: { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' } },
+          { label: 'Open',    activeStyle: { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' } },
+          { label: 'Closed',  activeStyle: { background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' } },
+          { label: 'Core',    activeStyle: { background: '#A9A9A9', color: '#0B0B0B' } },
+          { label: 'Premier', activeStyle: { background: '#D4AF37', color: '#0B0B0B' } },
+          { label: 'Vestige', activeStyle: { background: '#B87333', color: '#0B0B0B' } },
+        ].map(({ label, activeStyle }) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-body whitespace-nowrap transition-colors ${
-              filter === f
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            }`}
+            key={label}
+            onClick={() => setFilter(label)}
+            className="px-3 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-body whitespace-nowrap transition-all"
+            style={
+              filter === label
+                ? activeStyle
+                : { background: 'hsl(var(--secondary))', color: 'hsl(var(--secondary-foreground))' }
+            }
           >
-            {f}
+            {label}
           </button>
         ))}
       </div>
