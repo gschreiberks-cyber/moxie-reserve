@@ -7,41 +7,72 @@ import CurationTimeline from '@/components/alchemist/CurationTimeline';
 import MashBill from '@/components/alchemist/MashBill';
 
 const CAPACITY_OPTIONS = [
-  { label: '50%', sub: 'The Foundation', oz: 12.7 },
-  { label: '75%', sub: 'The Progression', oz: 19.05 },
-  { label: '100%', sub: 'The Masterpiece', oz: 25.4 },
+  { label: '50%', sub: 'The Genesis',   oz: 12.7  },
+  { label: '75%', sub: 'The Evolution', oz: 19.05 },
+  { label: '100%', sub: 'The Opus',     oz: 25.4  },
 ];
 
+// ── Golden Ratio allocator (mirrors Alchemist page logic) ───────────────────
+const VESTIGE_MAX_OZ = 1.5;
+const TIER_SHARE = { Core: 0.60, Premier: 0.30, Vestige: 0.10 };
+
 function buildRatios(selected, capacityOz = 25.4) {
-  const weights = selected.map(b => (b.proof || 90) + Math.random() * 10);
-  const totalW = weights.reduce((s, w) => s + w, 0);
-  let items = selected.map((bottle, i) => {
-    const oz = Math.round((weights[i] / totalW) * capacityOz * 2) / 2;
-    return { bottle, oz };
-  });
-  const totalOz = items.reduce((s, i) => s + i.oz, 0) || 1;
-  items = items.map(i => ({
+  const byTier = { Core: [], Premier: [], Vestige: [] };
+  selected.forEach(b => { (byTier[b.rarity] || byTier['Core']).push(b); });
+
+  const vestCount = byTier.Vestige.length;
+  const vestAlloc = vestCount > 0 ? Math.min(capacityOz * TIER_SHARE.Vestige, VESTIGE_MAX_OZ * vestCount) : 0;
+  const remaining = capacityOz - vestAlloc;
+  const coreCount = byTier.Core.length;
+  const premCount = byTier.Premier.length;
+
+  const coreFrac = coreCount > 0 ? TIER_SHARE.Core / (TIER_SHARE.Core + TIER_SHARE.Premier) : 0;
+  const premFrac = premCount > 0 ? TIER_SHARE.Premier / (TIER_SHARE.Core + TIER_SHARE.Premier) : 1;
+
+  function allocate(bottles, tierTotal) {
+    if (bottles.length === 0) return [];
+    const base = tierTotal / bottles.length;
+    const jittered = bottles.map(() => base * (0.95 + Math.random() * 0.10));
+    const sum = jittered.reduce((a, b) => a + b, 0);
+    return bottles.map((bottle, i) => ({
+      bottle,
+      oz: Math.round((jittered[i] / sum) * tierTotal * 2) / 2,
+    }));
+  }
+
+  const vestPerBottle = vestCount > 0 ? vestAlloc / vestCount : 0;
+  const allItems = [
+    ...allocate(byTier.Core, remaining * coreFrac),
+    ...allocate(byTier.Premier, remaining * premFrac),
+    ...byTier.Vestige.map(bottle => ({ bottle, oz: Math.round(vestPerBottle * 2) / 2 })),
+  ];
+
+  const totalOz = allItems.reduce((s, i) => s + i.oz, 0) || 1;
+  const withRatios = allItems.map(i => ({
     ...i,
     ratio: i.oz / totalOz,
     percentage: Math.round((i.oz / totalOz) * 100),
   }));
-  const diff = 100 - items.reduce((s, i) => s + i.percentage, 0);
-  items[0].percentage += diff;
-  return items;
+
+  const drift = 100 - withRatios.reduce((s, i) => s + i.percentage, 0);
+  const maxIdx = withRatios.reduce((mi, it, idx) => it.oz > withRatios[mi].oz ? idx : mi, 0);
+  withRatios[maxIdx].percentage += drift;
+  return withRatios;
 }
 
-// Phase label for each bottle position in the Velvet Marriage output
-function apexPhaseLabel(idx, rarity) {
-  if (idx === 0) return `Phase 1 Foundation`;
-  if (idx === 1 || idx === 2) return `Phase 2 Enhancement`;
-  return `Phase 3 The Crown`;
+// Phase label strictly driven by bottle rarity
+function apexPhaseLabel(rarity) {
+  if (rarity === 'Core')    return 'Phase 1 Foundation';
+  if (rarity === 'Premier') return 'Phase 2 Enhancement';
+  if (rarity === 'Vestige') return 'Phase 3 The Crown';
+  return '';
 }
 
 // ── Capacity Selector ────────────────────────────────────────────────────────
 function CapacitySelector({ value, onChange }) {
   return (
     <div className="mb-5">
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mb-2">Target Capacity</p>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mb-2">Curation Volume</p>
       <div className="flex gap-2">
         {CAPACITY_OPTIONS.map(opt => {
           const active = value === opt.oz;
@@ -78,7 +109,7 @@ function RecipeRows({ items, showPhases }) {
           <div className="flex-1 min-w-0">
             <p className="font-body text-xs text-foreground truncate">{item.bottle.bottle_name}</p>
             <p className="text-[10px] text-muted-foreground font-body">
-              {showPhases ? `${apexPhaseLabel(idx, item.bottle.rarity)} · ` : ''}{item.percentage}% · {item.bottle.rarity}
+              {showPhases ? `${apexPhaseLabel(item.bottle.rarity)} · ` : ''}{item.percentage}% · {item.bottle.rarity}
             </p>
           </div>
         </div>
