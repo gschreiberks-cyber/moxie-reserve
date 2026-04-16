@@ -111,7 +111,7 @@ function PursuitForm({ onSubmit, onCancel }) {
         className="w-full max-w-lg bg-card border border-border rounded-t-xl sm:rounded-xl p-6"
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-heading text-xl text-foreground">Add to The Pursuit</h2>
+          <h2 className="font-heading text-xl text-foreground">Add to The Hunt</h2>
           <button onClick={onCancel} className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
@@ -143,7 +143,7 @@ function PursuitForm({ onSubmit, onCancel }) {
           </div>
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="outline" onClick={onCancel} className="flex-1 border-border">Cancel</Button>
-            <Button type="submit" className="flex-1 gold-btn">Add to Pursuit</Button>
+            <Button type="submit" className="flex-1 gold-btn">Add to Hunt</Button>
           </div>
         </form>
       </motion.div>
@@ -190,13 +190,13 @@ export default function Vault() {
         <p className="text-[10px] uppercase tracking-[0.3em] font-body mb-1" style={{ color: '#D4AF37' }}>
           Moxie Reserve
         </p>
-        <h1 className="font-heading text-3xl text-foreground">The Pursuit</h1>
+        <h1 className="font-heading text-3xl text-foreground">The Hunt</h1>
         <p className="text-sm text-muted-foreground font-body mt-1">Your active hunt list. Track the chase.</p>
       </div>
 
       {/* Section header */}
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="font-heading text-lg text-foreground">My Pursuit</h2>
+        <h2 className="font-heading text-lg text-foreground">My Hunt</h2>
         <div className="flex-1 h-px bg-border" />
         <button
           onClick={() => setShowForm(true)}
@@ -211,7 +211,7 @@ export default function Vault() {
         <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-card border border-border rounded-md animate-pulse" />)}</div>
       ) : wishlist.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-muted-foreground font-body text-sm">No bottles on the pursuit yet.</p>
+          <p className="text-muted-foreground font-body text-sm">No bottles on the hunt yet.</p>
         </div>
       ) : (
         <div className="space-y-2 mb-8">

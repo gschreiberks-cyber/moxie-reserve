@@ -7,19 +7,20 @@ import { Slider } from '@/components/ui/slider';
 const VOLUME_MAP = { Full: 750, Half: 375, Quarter: 185 };
 
 function buildRatios(selected) {
-  const batchMl = 750;
+  const batchOz = 25.4; // ~750ml
   const weights = selected.map(b => (b.proof || 90) + Math.random() * 10);
   const totalW = weights.reduce((s, w) => s + w, 0);
   let items = selected.map((bottle, i) => {
     const ratio = weights[i] / totalW;
-    const percentage = Math.round(ratio * 100);
-    return {
-      bottle,
-      ratio,
-      percentage,
-      oz: parseFloat((ratio * batchMl / 29.574).toFixed(1)),
-    };
+    const oz = Math.round(ratio * batchOz * 2) / 2; // nearest 0.5
+    return { bottle, oz };
   });
+  const totalOz = items.reduce((s, i) => s + i.oz, 0) || 1;
+  items = items.map(i => ({
+    ...i,
+    ratio: i.oz / totalOz,
+    percentage: Math.round((i.oz / totalOz) * 100),
+  }));
   const diff = 100 - items.reduce((s, i) => s + i.percentage, 0);
   items[0].percentage += diff;
   return items;
@@ -208,7 +209,7 @@ export default function ApexBlend({ openBottles, onSave, onClose }) {
           <div>
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body">Premium · VIP</p>
             <h2 className="font-heading text-xl" style={{ color: '#D4AF37', textShadow: '0 0 16px rgba(212,175,55,0.3)' }}>
-              The Apex Blend
+              The Velvet Marriage
             </h2>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">

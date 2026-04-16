@@ -33,7 +33,7 @@ const BLEND_TYPES = [
   },
   {
     id: 'apex',
-    label: 'The Apex Blend',
+    label: 'The Velvet Marriage',
     premium: true,
     desc: 'VIP — Bespoke formulation or algorithmic curation.',
     isApex: true,
@@ -70,22 +70,27 @@ function generateBlend(openBottles, blendTypeId) {
     return null;
   }
 
-  // Build ratios weighted by proof
+  // Build ratios weighted by proof, round oz to nearest 0.5
   const weights = selected.map(b => (b.proof || 90) + Math.random() * 8);
   const totalW = weights.reduce((s, w) => s + w, 0);
-  const batchMl = 750;
+  const batchOz = 25.4; // ~750ml total
 
   let items = selected.map((bottle, i) => {
     const ratio = weights[i] / totalW;
-    return {
-      bottle,
-      ratio,
-      percentage: Math.round(ratio * 100),
-      oz: parseFloat((ratio * batchMl / 29.574).toFixed(1)),
-    };
+    const rawOz = ratio * batchOz;
+    const oz = Math.round(rawOz * 2) / 2; // round to nearest 0.5
+    return { bottle, ratio, oz };
   });
 
-  // Fix rounding drift
+  // Recalculate percentages from rounded oz values
+  const totalOz = items.reduce((s, i) => s + i.oz, 0) || 1;
+  items = items.map(i => ({
+    ...i,
+    percentage: Math.round((i.oz / totalOz) * 100),
+    ratio: i.oz / totalOz,
+  }));
+
+  // Fix percentage rounding drift
   const pctDiff = 100 - items.reduce((s, i) => s + i.percentage, 0);
   items[0].percentage += pctDiff;
 
@@ -320,7 +325,7 @@ export default function Alchemist() {
           {/* Premium upsell */}
           {(selectedType === 'vestige') && !isPremium && (
             <div className="mb-4 p-3 border border-primary/20 rounded-md flex items-center justify-between">
-              <p className="text-xs text-muted-foreground font-body">Unlock Vestige & The Apex Blend</p>
+              <p className="text-xs text-muted-foreground font-body">Unlock Vestige & The Velvet Marriage</p>
               <Link to="/settings">
                 <Button size="sm" className="gold-btn text-[10px] uppercase tracking-widest font-body h-7 px-3">
                   Upgrade

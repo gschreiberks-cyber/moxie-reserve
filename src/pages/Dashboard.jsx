@@ -119,6 +119,37 @@ export default function Dashboard() {
         <div className="h-px flex-1 bg-border" />
       </motion.div>
 
+      {/* The Ledger */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.38, duration: 0.5 }}
+        className="mb-6 border border-border rounded-md overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.02)' }}
+      >
+        <div className="px-4 py-2 border-b border-border flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.3em] font-body" style={{ color: '#D4AF37' }}>The Ledger</span>
+        </div>
+        <div className="grid grid-cols-2 divide-x divide-border">
+          <div className="px-4 py-4 text-center">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mb-1">Total MSRP</p>
+            <p className="font-heading text-xl text-foreground">${totalValue.toLocaleString()}</p>
+          </div>
+          <div className="px-4 py-4 text-center">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-body mb-1">Est. Market</p>
+            <p
+              className="font-heading text-xl"
+              style={{
+                color: '#D4AF37',
+                textShadow: '0 0 14px rgba(212,175,55,0.5), 0 0 28px rgba(212,175,55,0.2)',
+              }}
+            >
+              ${Math.round(totalValue * 1.35).toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Quick Links */}
       <div className="space-y-3 mb-8">
         <QuickLink
@@ -138,7 +169,7 @@ export default function Dashboard() {
         <QuickLink
           to="/vault"
           icon={Star}
-          label="The Pursuit"
+          label="The Hunt"
           sub={`${wishlist.length} bottle${wishlist.length !== 1 ? 's' : ''} on the hunt`}
           delay={0.6}
         />
